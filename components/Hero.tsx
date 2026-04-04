@@ -10,7 +10,7 @@ export default function Hero() {
                                 <span className="block text-emerald-500 xl:inline">autopilot</span>
                             </h1>
                             <p className="mt-3 text-base text-slate-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                                Generate personalized meal plans based on your goals, diet preferences, and calories in seconds. Let MealAI take the guesswork out of nutrition.
+                                Generate personalized meal plans based on your goals, diet preferences, and calories in seconds. Let CustomDailyDiet take the guesswork out of nutrition.
                             </p>
                             <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                                 <div className="rounded-md shadow">
