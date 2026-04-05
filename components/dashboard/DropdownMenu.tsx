@@ -51,7 +51,7 @@ export default function DropdownMenu({ items, trigger, align = "right" }: Dropdo
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         transition={{ duration: 0.15, ease: "easeOut" }}
-                        className={`absolute z-[100] mt-2 min-w-[200px] bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 ${
+                        className={`absolute z-[100] mt-2 min-w-[200px] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 p-2 ${
                             align === "right" ? "right-0" : "left-0"
                         }`}
                     >
@@ -64,8 +64,8 @@ export default function DropdownMenu({ items, trigger, align = "right" }: Dropdo
                                 }}
                                 className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
                                     item.variant === "danger"
-                                        ? "text-red-500 hover:bg-red-50"
-                                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                        ? "text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                                 }`}
                             >
                                 {item.icon && <span className="text-current">{item.icon}</span>}
