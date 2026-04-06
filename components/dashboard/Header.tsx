@@ -63,34 +63,57 @@ export default function Header({
         if (d instanceof Date) {
             return d.toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' });
         } else {
-            const start = d.start.toLocaleDateString("en-US", { month: 'short', day: 'numeric' });
-            const end = d.end ? d.end.toLocaleDateString("en-US", { month: 'short', day: 'numeric' }) : "Select End";
-            return `${start} - ${end}`;
+            const startStr = d.start.toLocaleDateString("en-US", { month: 'short', day: 'numeric' });
+            if (!d.end || d.end.getTime() === d.start.getTime()) {
+                return startStr;
+            }
+            const endStr = d.end.toLocaleDateString("en-US", { month: 'short', day: 'numeric' });
+            return `${startStr} - ${endStr}`;
         }
     };
 
     const isToday = (d: Date | { start: Date; end: Date | null }) => {
-        if (!(d instanceof Date)) return false;
+        const dateToCheck = d instanceof Date ? d : d.start;
         const today = new Date();
-        return d.getDate() === today.getDate() && 
-               d.getMonth() === today.getMonth() && 
-               d.getFullYear() === today.getFullYear();
+        return dateToCheck.getDate() === today.getDate() && 
+               dateToCheck.getMonth() === today.getMonth() && 
+               dateToCheck.getFullYear() === today.getFullYear();
     };
 
     const nextDate = () => {
         if (isProcessing) return;
-        const current = selectedDate instanceof Date ? selectedDate : selectedDate.start;
-        const next = new Date(current);
-        next.setDate(next.getDate() + (viewMode === "day" ? 1 : 7));
-        onDateChange(next);
+        if (viewMode === "day") {
+            const current = selectedDate instanceof Date ? selectedDate : selectedDate.start;
+            const next = new Date(current);
+            next.setDate(next.getDate() + 1);
+            onDateChange(next);
+        } else {
+            const start = selectedDate instanceof Date ? selectedDate : selectedDate.start;
+            const end = selectedDate instanceof Date ? selectedDate : (selectedDate.end || selectedDate.start);
+            const nextStart = new Date(start);
+            const nextEnd = new Date(end);
+            nextStart.setDate(nextStart.getDate() + 7);
+            nextEnd.setDate(nextEnd.getDate() + 7);
+            onDateChange({ start: nextStart, end: nextEnd });
+        }
     };
 
     const prevDate = () => {
         if (isProcessing) return;
-        const current = selectedDate instanceof Date ? selectedDate : selectedDate.start;
-        const prev = new Date(current);
-        prev.setDate(prev.getDate() - (viewMode === "day" ? 1 : 7));
-        onDateChange(prev);
+        if (viewMode === "day") {
+            const current = selectedDate instanceof Date ? selectedDate : selectedDate.start;
+            const prev = new Date(current);
+            prev.setDate(prev.getDate() - 1);
+            onDateChange(prev);
+        } else {
+            const start = selectedDate instanceof Date ? selectedDate : selectedDate.start;
+            const end = selectedDate instanceof Date ? selectedDate : (selectedDate.end || selectedDate.start);
+            const prevStart = new Date(start);
+            const prevEnd = new Date(end);
+            prevStart.setDate(prevStart.getDate() - 7);
+            prevEnd.setDate(prevEnd.getDate() - 7);
+            onDateChange({ start: prevStart, end: prevEnd });
+        }
     };
 
     return (
@@ -128,6 +151,30 @@ export default function Header({
                     </button>
                 </div>
 
+                <div className="relative">
+                    <button 
+                        onClick={() => !isProcessing && setIsCalendarOpen(true)}
+                        className="p-2 bg-slate-100 dark:bg-slate-800 text-emerald-500 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-all border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800 shadow-sm"
+                        title="Open Calendar"
+                    >
+                        <Calendar size={18} />
+                    </button>
+
+                    <CalendarModal 
+                        isOpen={isCalendarOpen} 
+                        onClose={() => setIsCalendarOpen(false)} 
+                        currentDate={selectedDate instanceof Date ? selectedDate : selectedDate.start}
+                        onSelectDate={(d) => {
+                            if (d instanceof Date) {
+                                onDateChange({ start: d, end: d });
+                            } else {
+                                onDateChange(d);
+                            }
+                        }}
+                        viewMode={viewMode}
+                    />
+                </div>
+
                 <div className="hidden md:flex items-center space-x-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2 py-1 rounded-xl">
                     <button 
                         onClick={prevDate}
@@ -161,39 +208,6 @@ export default function Header({
             </div>
 
             <div className="flex items-center space-x-3">
-                <div className="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
-                    <button 
-                        onClick={() => onThemeChange("light")}
-                        className={`p-1.5 rounded-lg transition-all ${
-                            theme === "light" 
-                                ? "bg-white dark:bg-slate-700 text-yellow-500 shadow-sm" 
-                                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                        }`}
-                    >
-                        <Sun size={18} />
-                    </button>
-                    <button 
-                        onClick={() => onThemeChange("dark")}
-                        className={`p-1.5 rounded-lg transition-all ${
-                            theme === "dark" 
-                                ? "bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm" 
-                                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                        }`}
-                    >
-                        <Moon size={18} />
-                    </button>
-                    <button 
-                        onClick={() => onThemeChange("system")}
-                        className={`p-1.5 rounded-lg transition-all ${
-                            theme === "system" 
-                                ? "bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-400 shadow-sm" 
-                                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                        }`}
-                    >
-                        <Monitor size={18} />
-                    </button>
-                </div>
-
                 <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block mx-1"></div>
 
                 <AnimatePresence mode="wait">
@@ -216,7 +230,43 @@ export default function Header({
                 </AnimatePresence>
 
                 <div className="flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
-                    <button className="p-2 text-slate-400 hover:text-emerald-500 transition-colors">
+                    <button 
+                        onClick={() => onThemeChange("light")}
+                        className={`p-1.5 rounded-lg transition-all ${
+                            theme === "light" 
+                                ? "bg-white dark:bg-slate-700 text-yellow-500 shadow-sm" 
+                                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                        }`}
+                        title="Light Mode"
+                    >
+                        <Sun size={18} />
+                    </button>
+                    <button 
+                        onClick={() => onThemeChange("dark")}
+                        className={`p-1.5 rounded-lg transition-all ${
+                            theme === "dark" 
+                                ? "bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm" 
+                                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                        }`}
+                        title="Dark Mode"
+                    >
+                        <Moon size={18} />
+                    </button>
+                    <button 
+                        onClick={() => onThemeChange("system")}
+                        className={`p-1.5 rounded-lg transition-all ${
+                            theme === "system" 
+                                ? "bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-400 shadow-sm" 
+                                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                        }`}
+                        title="System Mode"
+                    >
+                        <Monitor size={18} />
+                    </button>
+                    
+                    <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+
+                    <button className="p-2 text-slate-400 hover:text-emerald-500 transition-colors" title="Notifications">
                         <Bell size={18} />
                     </button>
                     <button 
@@ -229,13 +279,6 @@ export default function Header({
                 </div>
             </div>
 
-            <CalendarModal 
-                isOpen={isCalendarOpen} 
-                onClose={() => setIsCalendarOpen(false)} 
-                currentDate={selectedDate instanceof Date ? selectedDate : selectedDate.start}
-                onSelectDate={onDateChange}
-                viewMode={viewMode}
-            />
         </header>
     );
 }

@@ -24,6 +24,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { generateMealPlan, GeneratedMeal, UserPreferences } from "../../lib/meal-planner";
 import { FOOD_DATABASE } from "../../lib/food-db";
 import DropdownMenu from "./DropdownMenu";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface MealSectionProps {
     viewMode: "day" | "week";
@@ -204,7 +206,94 @@ export default function MealSection({
         return dates;
     }, [viewMode, selectedDate, dateRange]);
 
-    const generateFormattedPlan = useCallback(() => {
+    const handleGeneratePDF = useCallback(() => {
+        const doc = new jsPDF();
+        
+        // Header
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(22);
+        doc.setTextColor(16, 185, 129); // Emerald-500
+        doc.text("CustomDailyDiet", 14, 25);
+        
+        doc.setFontSize(12);
+        doc.setTextColor(100);
+        doc.setFont("helvetica", "normal");
+        doc.text("Personalized Daily Nutrition Roadmap", 14, 32);
+
+        const dateRangeStr = targetDates.length > 1 
+            ? `${targetDates[0].toLocaleDateString()} - ${targetDates[targetDates.length - 1].toLocaleDateString()}`
+            : targetDates[0].toLocaleDateString();
+            
+        doc.setFontSize(10);
+        doc.text(`Plan Period: ${dateRangeStr}`, 14, 42);
+        doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 47);
+
+        let yPos = 60;
+
+        targetDates.forEach((date, idx) => {
+            const dateKey = getDateKey(date);
+            const dayMeals = mealsMap[dateKey];
+
+            if (dayMeals) {
+                // Check for page break
+                if (yPos > 230) {
+                    doc.addPage();
+                    yPos = 25;
+                }
+
+                // Date Heading
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(14);
+                doc.setTextColor(30);
+                const dayTitle = date.toLocaleDateString("en-US", { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+                doc.text(dayTitle.toUpperCase(), 14, yPos);
+                yPos += 8;
+
+                const tableData = dayMeals.map(meal => [
+                    meal.slot,
+                    meal.items.map(i => `${i.food.name} (${i.amount}x)`).join("\n"),
+                    `${meal.totalCalories} kcal`
+                ]);
+
+                autoTable(doc, {
+                    startY: yPos,
+                    head: [['Meal Slot', 'Ingredients / Composition', 'Calories']],
+                    body: tableData,
+                    theme: 'striped',
+                    headStyles: { 
+                        fillColor: [16, 185, 129], 
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold'
+                    },
+                    bodyStyles: { 
+                        fontSize: 9,
+                        cellPadding: 6
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 35, fontStyle: 'bold' },
+                        1: { cellWidth: 'auto' },
+                        2: { cellWidth: 30, halign: 'right' }
+                    },
+                    margin: { left: 14, right: 14 }
+                });
+
+                yPos = (doc as any).lastAutoTable.finalY + 20;
+            }
+        });
+
+        // Footer on last page
+        const pageCount = (doc as any).internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(150);
+            doc.text(`Page ${i} of ${pageCount} | customdailydiet.ai`, 105, 285, { align: "center" });
+        }
+
+        doc.save(`meal-plan-${new Date().toISOString().split('T')[0]}.pdf`);
+    }, [targetDates, mealsMap]);
+
+    const handleWhatsAppShare = () => {
         let content = "My CustomDailyDiet Meal Plan\n\n";
         targetDates.forEach(date => {
             const dateStr = getDateKey(date);
@@ -217,34 +306,27 @@ export default function MealSection({
                 content += "\n";
             }
         });
-        return content;
-    }, [targetDates, mealsMap]);
-
-    const handleWhatsAppShare = () => {
-        const content = generateFormattedPlan();
         window.open(`https://wa.me/?text=${encodeURIComponent(content)}`, "_blank");
     };
 
     const handleEmailShare = () => {
-        const content = generateFormattedPlan();
+        let content = "My CustomDailyDiet Meal Plan\n\n";
+        targetDates.forEach(date => {
+            const dateStr = getDateKey(date);
+            const dayMeals = mealsMap[dateStr];
+            if (dayMeals) {
+                content += `📅 ${date.toLocaleDateString("en-US", { weekday: 'long', month: 'short', day: 'numeric' })}\n`;
+                dayMeals.forEach(meal => {
+                    content += `${meal.slot}: ${meal.items.map(i => i.food.name).join(" + ")} (${meal.totalCalories} kcal)\n`;
+                });
+                content += "\n";
+            }
+        });
         window.location.href = `mailto:?subject=My Meal Plan&body=${encodeURIComponent(content)}`;
     };
 
-    const handleDownloadPlan = () => {
-        const content = generateFormattedPlan();
-        const blob = new Blob([content], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `meal-plan-${new Date().toISOString().split('T')[0]}.txt`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    };
-
     const shareItems = [
-        { label: "Download Plan", onClick: handleDownloadPlan, icon: <Download size={16} /> },
+        { label: "Download PDF Plan", onClick: handleGeneratePDF, icon: <Download size={16} /> },
         { label: "Send via WhatsApp", onClick: handleWhatsAppShare, icon: <Phone size={16} className="text-emerald-500" /> },
         { label: "Send via Email", onClick: handleEmailShare, icon: <Mail size={16} className="text-blue-500" /> },
         { label: "Regenerate All", onClick: handleRegenerate, icon: <RefreshCcw size={16} />, variant: "danger" as const },

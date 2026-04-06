@@ -3,6 +3,7 @@
 @theme {
     --font-sans: ui-sans-serif, system-ui, sans-serif,
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --dark-mode: class;
 }
 
 html {
@@ -11,6 +12,9 @@ html {
 
 body {
     font-family: var(--font-sans);
-    background-color: #f8fafc;
-    color: #0f172a;
+    @apply bg-slate-50 text-slate-900 transition-colors duration-300;
+}
+
+.dark body {
+    @apply bg-slate-950 text-slate-50;
 }
