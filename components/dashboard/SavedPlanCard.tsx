@@ -21,7 +21,7 @@ export default function SavedPlanCard({ plan, onView, onEdit, onDelete }: SavedP
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none p-6 flex flex-col group transition-all hover:shadow-2xl hover:shadow-emerald-500/5 relative overflow-hidden h-full"
+            className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none p-6 flex flex-col group transition-all hover:shadow-md hover:shadow-emerald-500/5 relative overflow-hidden h-full"
         >
             {/* Background Accent */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-emerald-500/10 transition-colors" />

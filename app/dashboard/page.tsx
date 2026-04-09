@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../components/dashboard/Header";
 import MealSection from "../../components/dashboard/MealSection";
-import NutritionPanel from "../../components/dashboard/NutritionPanel";
+import NutritionChart from "../../components/dashboard/NutritionChart";
+import SavedFoodsPanel from "../../components/dashboard/SavedFoodsPanel";
 import OnboardingModal from "./OnboardingModal";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
@@ -192,12 +193,9 @@ export default function DashboardPage() {
                                             />
                                         </div>
 
-                                        <div className="flex-1 lg:max-w-md">
-                                            <NutritionPanel 
-                                                isProcessing={isProcessing} 
-                                                selectedDate={legacySelectedDate}
-                                                viewMode={viewMode}
-                                            />
+                                        <div className="flex-1 lg:max-w-md space-y-8">
+                                            <NutritionChart selectedDate={legacySelectedDate} />
+                                            <SavedFoodsPanel />
                                         </div>
                                     </div>
                                 </div>
