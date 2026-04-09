@@ -159,7 +159,7 @@ export default function Sidebar({ collapsed, setCollapsed }: { collapsed: boolea
         <motion.aside 
             initial={false}
             animate={{ width: collapsed ? 80 : 280 }}
-            className="fixed left-0 top-0 h-screen bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-50 flex flex-col transition-all duration-300 ease-in-out"
+            className="h-screen bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-50 flex flex-col transition-all duration-300 ease-in-out shrink-0"
         >
             <div className="p-4 flex items-center justify-between">
                 {!collapsed && (

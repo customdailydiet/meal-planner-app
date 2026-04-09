@@ -13,7 +13,6 @@ import {
     Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import Sidebar from "../../../components/dashboard/Sidebar";
 import Header from "../../../components/dashboard/Header";
 import { useTheme } from "../../../components/ThemeProvider";
 import { useSavedPlans } from "../../../lib/hooks/useSavedPlans";
@@ -79,11 +78,8 @@ export default function SavedPlansPage() {
     };
 
     return (
-        <div className="flex h-screen bg-slate-50 dark:bg-slate-950 transition-colors overflow-hidden">
-            <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-            
-            <main className={`flex-1 overflow-y-auto transition-all duration-300 ${collapsed ? "ml-[80px]" : "ml-[280px]"}`}>
-                <Header title="Meal Library" theme={theme} onThemeChange={setTheme} />
+        <div className="flex flex-col min-w-0 h-full">
+            <Header title="Meal Library" theme={theme} onThemeChange={setTheme} />
 
                 <ClientOnly fallback={
                     <div className="max-w-7xl mx-auto p-4 sm:p-8 space-y-12">
@@ -215,7 +211,6 @@ export default function SavedPlansPage() {
                         />
                     )}
                 </AnimatePresence>
-            </main>
         </div>
     );
 }

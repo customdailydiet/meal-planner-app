@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { Plus, Link as LinkIcon, ChefHat, Salad, UtensilsCrossed } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import Sidebar from "../../../components/dashboard/Sidebar";
 import Header from "../../../components/dashboard/Header";
 import { useTheme } from "../../../components/ThemeProvider";
 import { useMounted } from "../../../lib/hooks/useMounted";
@@ -45,16 +44,13 @@ export default function CustomRecipesPage() {
     }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex transition-colors overflow-hidden">
-            <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-
-            <main className={`flex-1 flex flex-col min-w-0 transition-all duration-300 h-screen ${collapsed ? "lg:ml-[80px]" : "lg:ml-[280px]"}`}>
-                <Header 
-                    toggleMobileMenu={() => setMobileMenuOpen(true)}
-                    theme={theme}
-                    onThemeChange={setTheme}
-                    title="Custom Library"
-                />
+        <div className="flex flex-col min-w-0 h-full">
+            <Header 
+                toggleMobileMenu={() => setMobileMenuOpen(true)}
+                theme={theme}
+                onThemeChange={setTheme}
+                title="Custom Library"
+            />
 
                 <ClientOnly fallback={
                     <div className="flex-1 p-4 lg:p-10">
@@ -180,7 +176,6 @@ export default function CustomRecipesPage() {
                         onClose={() => setSelectedItem(null)}
                     />
                 )}
-            </main>
         </div>
     );
 }

@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import Sidebar from "../../../../components/dashboard/Sidebar";
 import Header from "../../../../components/dashboard/Header";
 import { useCollections } from "../../../../lib/hooks/useCollections";
 import { useFavorites } from "../../../../lib/hooks/useFavorites";
@@ -99,15 +98,12 @@ export default function CollectionDetailPage() {
     const isRecurring = collectionData ? recurringIds.includes(collectionData.id) : false;
 
     return (
-        <div className="flex h-screen bg-slate-50 dark:bg-slate-950 transition-colors">
-            <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-            
-            <main className={`flex-1 overflow-y-auto transition-all duration-300 ${collapsed ? "ml-[80px]" : "ml-[280px]"}`}>
-                <Header 
-                    title={collectionData?.name || "Collection"} 
-                    theme={theme}
-                    onThemeChange={setTheme}
-                />
+        <div className="flex flex-col min-w-0 h-full">
+            <Header 
+                title={collectionData?.name || "Collection"} 
+                theme={theme}
+                onThemeChange={setTheme}
+            />
 
                 <ClientOnly fallback={
                     <div className="max-w-7xl mx-auto p-4 sm:p-8 space-y-12 pb-32">
@@ -256,7 +252,6 @@ export default function CollectionDetailPage() {
                         onClose={() => setSelectedFood(null)}
                     />
                 )}
-            </main>
         </div>
     );
 }

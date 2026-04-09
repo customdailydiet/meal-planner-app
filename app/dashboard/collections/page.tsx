@@ -16,7 +16,6 @@ import {
     Compass,
     CheckCircle2
 } from "lucide-react";
-import Sidebar from "../../../components/dashboard/Sidebar";
 import Header from "../../../components/dashboard/Header";
 import { useCollections } from "../../../lib/hooks/useCollections";
 import { useFavorites } from "../../../lib/hooks/useFavorites";
@@ -49,15 +48,12 @@ export default function CollectionsDashboard() {
     const followedItems = FEATURED_COLLECTIONS.filter(fc => followedIds.includes(fc.id));
 
     return (
-        <div className="flex h-screen bg-slate-50 dark:bg-slate-950 transition-colors">
-            <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-            
-            <main className={`flex-1 overflow-y-auto transition-all duration-300 ${collapsed ? "ml-[80px]" : "ml-[280px]"}`}>
-                <Header 
-                    title="Collections" 
-                    theme={theme} 
-                    onThemeChange={setTheme} 
-                />
+        <div className="flex flex-col min-w-0 h-full">
+            <Header 
+                title="Collections" 
+                theme={theme} 
+                onThemeChange={setTheme} 
+            />
 
 
                 <ClientOnly fallback={
@@ -188,7 +184,6 @@ export default function CollectionsDashboard() {
                         </div>
                     </DataReady>
                 </ClientOnly>
-            </main>
         </div>
     );
 }

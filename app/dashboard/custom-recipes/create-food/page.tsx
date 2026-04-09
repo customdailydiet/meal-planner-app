@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Upload, Camera, Trash2, Check, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import Sidebar from "../../../../components/dashboard/Sidebar";
 import Header from "../../../../components/dashboard/Header";
 import { useTheme } from "../../../../components/ThemeProvider";
 import { useCustomFoods } from "../../../../lib/hooks/useCustomFoods";
@@ -91,20 +90,17 @@ export default function CreateFoodPage() {
     if (!mounted) return null;
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex transition-colors overflow-hidden">
-            <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-
-            <main className={`flex-1 flex flex-col min-w-0 transition-all duration-300 h-screen ${collapsed ? "lg:ml-[80px]" : "lg:ml-[280px]"}`}>
-                <Header 
-                    toggleMobileMenu={() => setMobileMenuOpen(true)}
-                    viewMode="day"
-                    setViewMode={() => {}}
-                    selectedDate={new Date()}
-                    onDateChange={() => {}}
-                    theme={theme}
-                    onThemeChange={setTheme}
-                    isProcessing={false}
-                />
+        <div className="flex flex-col min-w-0 h-full">
+            <Header 
+                toggleMobileMenu={() => setMobileMenuOpen(true)}
+                viewMode="day"
+                setViewMode={() => {}}
+                selectedDate={new Date()}
+                onDateChange={() => {}}
+                theme={theme}
+                onThemeChange={setTheme}
+                isProcessing={false}
+            />
 
                 <div className="flex-1 p-4 lg:p-10 overflow-y-auto relative scrollbar-hide">
                     <div className="max-w-3xl mx-auto space-y-8 pb-20">
@@ -273,7 +269,6 @@ export default function CreateFoodPage() {
                         </div>
                     </div>
                 </div>
-            </main>
         </div>
     );
 }
