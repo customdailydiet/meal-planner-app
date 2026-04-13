@@ -39,6 +39,7 @@ interface SidebarItemProps {
 
 const SidebarItem = ({ icon: Icon, label, href, active, collapsed, dropdown }: SidebarItemProps) => {
     const [isOpen, setIsOpen] = useState(false);
+    const pathname = usePathname();
 
     return (
         <div className="mb-1">
@@ -76,15 +77,22 @@ const SidebarItem = ({ icon: Icon, label, href, active, collapsed, dropdown }: S
                             transition={{ duration: 0.2 }}
                             className="bg-slate-50/50 dark:bg-slate-800/30 rounded-lg mt-1 ml-9 overflow-hidden"
                         >
-                            {dropdown.map((item) => (
-                                <Link 
-                                    key={item.label}
-                                    href={item.href}
-                                    className="block px-3 py-2 text-xs text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                                >
-                                    {item.label}
-                                </Link>
-                            ))}
+                            {dropdown.map((item) => {
+                                const isSubActive = pathname === item.href;
+                                return (
+                                    <Link 
+                                        key={item.label}
+                                        href={item.href}
+                                        className={`block px-3 py-2 text-xs font-semibold transition-colors ${
+                                            isSubActive 
+                                                ? "text-emerald-500 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/20" 
+                                                : "text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400"
+                                        }`}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                );
+                            })}
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -131,10 +139,10 @@ export default function Sidebar({ collapsed, setCollapsed }: { collapsed: boolea
         { 
             icon: Clock, 
             label: "Meals & Schedule", 
-            href: "#",
+            href: "/dashboard/meals-schedule/settings",
             dropdown: [
-                { label: "Meal Times", href: "/dashboard/meal-times" },
-                { label: "Reminders", href: "/dashboard/reminders" }
+                { label: "Meal Settings", href: "/dashboard/meals-schedule/settings" },
+                { label: "Leftovers", href: "/dashboard/meals-schedule/leftovers" }
             ]
         },
     ];
@@ -204,14 +212,19 @@ export default function Sidebar({ collapsed, setCollapsed }: { collapsed: boolea
 
                     <div>
                         <p className={`text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-2 px-3 ${collapsed ? "text-center" : ""}`}>SETTINGS</p>
-                        {dropdownItems.map((item) => (
-                            <SidebarItem 
-                                key={item.label} 
-                                {...item} 
-                                active={false} 
-                                collapsed={collapsed} 
-                            />
-                        ))}
+                        {dropdownItems.map((item) => {
+                            const isParentActive = pathname.startsWith(item.href) || 
+                                (item.dropdown?.some(sub => pathname === sub.href) ?? false);
+                            
+                            return (
+                                <SidebarItem 
+                                    key={item.label} 
+                                    {...item} 
+                                    active={isParentActive} 
+                                    collapsed={collapsed} 
+                                />
+                            );
+                        })}
                         {statsItems.map((item) => (
                             <SidebarItem 
                                 key={item.label} 

@@ -74,12 +74,18 @@ export function useNutritionTargets() {
         });
     };
 
+    const getActiveTarget = useCallback(() => {
+        return targets[0] || null;
+    }, [targets]);
+
     return {
         targets,
+        activeTarget: targets[0] || null,
         isLoaded,
         addTarget,
         updateTarget,
-        deleteTarget
+        deleteTarget,
+        getActiveTarget
     };
 }
 
