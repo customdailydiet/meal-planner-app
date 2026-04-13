@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     X, Save, ArrowLeft, Users, ChevronRight, Settings2, 
     Calendar, Heart, Plus, Search, CheckCircle2, AlertTriangle,
-    CookingPot, Zap, Clock, Info, Loader2
+    CookingPot, Zap, Clock, Info, Loader2, Target
 } from 'lucide-react';
 import { 
     Meal, MealSize, MealType, MealComplexity, FoodPreference, 

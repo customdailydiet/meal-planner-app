@@ -164,7 +164,7 @@ const MealSearchModal: React.FC<MealSearchModalProps> = ({ isOpen, onClose, onSe
                                                 <p className="font-bold text-gray-900 capitalize">{highlightText(food.name, debouncedSearch)}</p>
                                                 <div className="flex gap-2">
                                                     <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{food.category}</span>
-                                                    {food.calories && <span className="text-[10px] font-bold text-gray-400">{food.calories} kcal</span>}
+                                                    {food.nutrition?.calories && <span className="text-[10px] font-bold text-gray-400">{food.nutrition.calories} kcal</span>}
                                                 </div>
                                             </div>
                                         </div>
