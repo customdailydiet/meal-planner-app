@@ -56,3 +56,7 @@ export function formatWeight(weightKg: number, unit: WeightUnit): FormattedWeigh
         };
     }
 }
+
+export function mapUnitSystemToWeightUnit(system: "metric" | "us"): WeightUnit {
+    return system === "metric" ? "kg" : "lbs";
+}

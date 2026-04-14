@@ -45,13 +45,14 @@ export default function NutritionChart({ selectedDate }: { selectedDate: Date | 
                     });
                 });
                 
-                setStats({ 
+                setStats(prev => ({ 
+                    ...prev,
                     calories: Math.round(calories), 
                     protein: Math.round(protein), 
                     carbs: Math.round(carbs), 
                     fat: Math.round(fat),
                     fiber: Math.round(fiber)
-                });
+                }));
             } catch (e) {
                 console.error("Error parsing stats", e);
             }

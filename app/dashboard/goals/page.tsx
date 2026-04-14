@@ -25,7 +25,7 @@ import { useNutritionTargets, generateTargetFromProfile } from "../../../lib/hoo
 import { GoalType, GoalMode } from "../../../types/user";
 import { calculateBMR, calculateTDEE } from "../../../lib/nutrition";
 import { WeightDisplay } from "../../../components/dashboard/WeightDisplay";
-import { formatWeight, convertToKg } from "../../../lib/utils/weight";
+import { formatWeight, convertToKg, mapUnitSystemToWeightUnit } from "../../../lib/utils/weight";
 import { useGeneratorSettings } from "../../../lib/hooks/useGeneratorSettings";
 
 export default function WeightGoalPage() {
@@ -63,18 +63,18 @@ export default function WeightGoalPage() {
 
     useEffect(() => {
         if (statsLoaded) {
-            const display = formatWeight(stats.weight, currentUnit);
+            const display = formatWeight(stats.weight, mapUnitSystemToWeightUnit(currentUnit));
             setWeightInput(display.primaryValue.toString());
         }
     }, [statsLoaded, stats.weight, currentUnit]);
 
     useEffect(() => {
         if (goalLoaded) {
-            const displayTarget = formatWeight(goal.targetWeightKg || 70, currentUnit);
+            const displayTarget = formatWeight(goal.targetWeightKg || 70, mapUnitSystemToWeightUnit(currentUnit));
             setTargetWeightInput(displayTarget.primaryValue.toString());
             
             // Weekly change speed is also in the selected unit
-            const displayChange = formatWeight(goal.weeklyChangeKg || 0.5, currentUnit);
+            const displayChange = formatWeight(goal.weeklyChangeKg || 0.5, mapUnitSystemToWeightUnit(currentUnit));
             setWeeklyChangeInput(displayChange.primaryValue.toString());
         }
     }, [goalLoaded, goal.targetWeightKg, goal.weeklyChangeKg, currentUnit]);
@@ -122,7 +122,7 @@ export default function WeightGoalPage() {
         }
         setWeightError(null);
         
-        const valInKg = currentUnit === "kg" ? val : convertToKg(val);
+        const valInKg = mapUnitSystemToWeightUnit(currentUnit) === "kg" ? val : convertToKg(val);
         updateStats({ weight: valInKg });
     };
 
@@ -132,13 +132,13 @@ export default function WeightGoalPage() {
 
         if (field === "target") {
             setTargetWeightInput(value);
-            const valInKg = currentUnit === "kg" ? val : convertToKg(val);
+            const valInKg = mapUnitSystemToWeightUnit(currentUnit) === "kg" ? val : convertToKg(val);
             if (valInKg >= 20 && valInKg <= 250) {
                 updateGoal({ targetWeightKg: valInKg });
             }
         } else {
             setWeeklyChangeInput(value);
-            const valInKg = currentUnit === "kg" ? val : convertToKg(val);
+            const valInKg = mapUnitSystemToWeightUnit(currentUnit) === "kg" ? val : convertToKg(val);
             if (valInKg >= 0.1 && valInKg <= 2) {
                 updateGoal({ weeklyChangeKg: valInKg });
             }
@@ -234,7 +234,7 @@ export default function WeightGoalPage() {
                             <div className="flex items-end space-x-4">
                                 <input 
                                     type="number"
-                                    step={currentUnit === "kg" ? "0.1" : "1"}
+                                    step={mapUnitSystemToWeightUnit(currentUnit) === "kg" ? "0.1" : "1"}
                                     value={weightInput}
                                     onChange={(e) => setWeightInput(e.target.value)}
                                     className="w-full text-5xl font-black text-slate-900 dark:text-white bg-transparent border-none p-0 focus:ring-0 placeholder:text-slate-200"
@@ -364,7 +364,7 @@ export default function WeightGoalPage() {
                                         <div className="px-2">
                                              <WeightDisplay 
                                                 weightKg={goal.targetWeightKg || 70} 
-                                                unit={currentUnit} 
+                                                unit={mapUnitSystemToWeightUnit(currentUnit)} 
                                                 size="sm"
                                             />
                                         </div>
@@ -378,7 +378,7 @@ export default function WeightGoalPage() {
                                         <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
                                             <input 
                                                 type="number"
-                                                step="0.01"
+                                                step={mapUnitSystemToWeightUnit(currentUnit) === "kg" ? "0.01" : "0.1"}
                                                 value={weeklyChangeInput}
                                                 onChange={(e) => handleExactWeightChange("change", e.target.value)}
                                                 className="w-full text-2xl font-black text-slate-900 dark:text-white bg-transparent border-none p-0 focus:ring-0"
@@ -386,7 +386,7 @@ export default function WeightGoalPage() {
                                         </div>
                                         <div className="px-2">
                                              <p className="text-[10px] font-bold text-slate-400 tracking-tight italic">
-                                                Equivalent: {formatWeight(goal.weeklyChangeKg || 0.5, currentUnit).secondary}/week
+                                                Equivalent: {formatWeight(goal.weeklyChangeKg || 0.5, mapUnitSystemToWeightUnit(currentUnit)).secondary}/week
                                              </p>
                                         </div>
                                         <p className="text-[10px] text-slate-400 font-medium px-2 italic">Recommended: 0.25 - 0.75 {currentUnit}</p>
@@ -395,7 +395,8 @@ export default function WeightGoalPage() {
                                     {/* Real-time Calculation Display */}
                                     {(() => {
                                         const rawVal = parseFloat(weeklyChangeInput);
-                                        const valInKg = isNaN(rawVal) ? 0 : (currentUnit === "kg" ? rawVal : convertToKg(rawVal));
+                                        const weightUnit = mapUnitSystemToWeightUnit(currentUnit);
+                                        const valInKg = isNaN(rawVal) ? 0 : (weightUnit === "kg" ? rawVal : convertToKg(rawVal));
                                         const deficit = Math.round(valInKg * 7700 / 7);
 
                                         return (

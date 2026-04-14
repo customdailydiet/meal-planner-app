@@ -36,6 +36,23 @@ interface MealSectionProps {
     isProcessing: boolean;
 }
 
+interface OnboardingPref {
+    generate: boolean;
+    categories: string[];
+    customFoods?: any[];
+}
+
+interface OnboardingMealSlot {
+    name: string;
+}
+
+// Type extension for jsPDF with AutoTable
+interface ExtendedJsPDF extends jsPDF {
+    lastAutoTable?: {
+        finalY: number;
+    };
+}
+
 const MealCard = ({ meal }: { meal: GeneratedMeal }) => {
     const [isExpanded, setIsExpanded] = useState(true);
 
@@ -134,13 +151,13 @@ export default function MealSection({
         const slots = JSON.parse(mealsRaw);
         let cache = cacheRaw ? JSON.parse(cacheRaw) : {};
 
-        const anyGenOn = Object.values(prefs).some((p: any) => p.generate);
+        const anyGenOn = Object.values(prefs as Record<string, OnboardingPref>).some(p => p.generate);
         const preferences: UserPreferences = {
-            selectedCategories: Object.values(prefs).flatMap((p: any) => p.categories),
+            selectedCategories: Object.values(prefs as Record<string, OnboardingPref>).flatMap(p => p.categories),
             favoriteFoodIds: [],
             excludedFoodIds: [],
-            customFoods: Object.values(prefs).flatMap((p: any) => p.customFoods || []),
-            mealSlots: slots.map((m: any) => m.name),
+            customFoods: Object.values(prefs as Record<string, OnboardingPref>).flatMap(p => p.customFoods || []),
+            mealSlots: (slots as OnboardingMealSlot[]).map(m => m.name),
             intelligentGeneration: anyGenOn,
             settings: settings // Inject active settings
         };
@@ -229,7 +246,7 @@ export default function MealSection({
     }, [viewMode, selectedDate, dateRange]);
 
     const handleGeneratePDF = useCallback(() => {
-        const doc = new jsPDF();
+        const doc = new jsPDF() as ExtendedJsPDF;
         
         // Header
         doc.setFont("helvetica", "bold");
@@ -299,12 +316,12 @@ export default function MealSection({
                     margin: { left: 14, right: 14 }
                 });
 
-                yPos = (doc as any).lastAutoTable.finalY + 20;
+                yPos = doc.lastAutoTable?.finalY ? doc.lastAutoTable.finalY + 20 : yPos + 20;
             }
         });
 
         // Footer on last page
-        const pageCount = (doc as any).internal.getNumberOfPages();
+        const pageCount = doc.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
             doc.setFontSize(8);

@@ -81,6 +81,12 @@ export function useMealSchedule() {
         }
     }, []);
 
+    // Save on changes
+    const saveSchedule = useCallback((newSchedule: MealSchedule) => {
+        setSchedule(newSchedule);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newSchedule));
+    }, []);
+
     // Safeguard 7: Localization Sync
     useEffect(() => {
         const globalFirstDay = settings.firstDayOfWeek;
@@ -90,12 +96,6 @@ export function useMealSchedule() {
             saveSchedule({ ...schedule, firstDayOfWeek: mapped });
         }
     }, [settings.firstDayOfWeek, schedule.firstDayOfWeek, isLoaded, schedule, saveSchedule]);
-
-    // Save on changes
-    const saveSchedule = useCallback((newSchedule: MealSchedule) => {
-        setSchedule(newSchedule);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newSchedule));
-    }, []);
 
     // CALCULATION ENGINE (Safety + Scaling)
     const calculatedMeals = useMemo(() => {
