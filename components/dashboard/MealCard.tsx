@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { AddItemModal } from "./AddItemModal";
+import { FoodItem } from "../../lib/food-db";
 import { useNutritionTargets } from "../../lib/hooks/useNutritionTargets";
 import { useUserStats } from "../../lib/hooks/useUserStats";
 import { useMealState } from "../../lib/contexts/MealStateContext";

@@ -25,6 +25,7 @@ export interface FoodItem {
     prepTime?: number;
     cookTime?: number;
     image?: string;
+    nutrition?: any; // For compatibility with discover-db
 }
 
 export const FOOD_DATABASE: FoodItem[] = [

@@ -52,26 +52,12 @@ export async function callGroqAPI(messages: GroqMessage[]) {
         const data = await response.json();
         console.log("[AI RAW RESPONSE]", JSON.stringify(data, null, 2));
         
-        try {
-            const fs = require('fs');
-            const logContent = `\n--- NEW AI REQUEST ---\nModel: ${model}\nRAW RESPONSE:\n${JSON.stringify(data, null, 2)}\n`;
-            fs.appendFileSync('ai_telemetry.log', logContent);
-        } catch (e) { }
-        
         const content = data.choices[0].message.content;
         try {
             const parsed = JSON.parse(content);
             console.log("[AI PARSED JSON]", JSON.stringify(parsed, null, 2));
-            try {
-                const fs = require('fs');
-                fs.appendFileSync('ai_telemetry.log', `\nPARSED JSON:\n${JSON.stringify(parsed, null, 2)}\n`);
-            } catch (e) {}
         } catch (e) {
             console.warn("[AI PARSE WARNING] Response was not JSON or failed to parse locally.");
-            try {
-                const fs = require('fs');
-                fs.appendFileSync('ai_telemetry.log', `\nFAILED TO PARSE JSON:\n${content}\n`);
-            } catch (e) {}
         }
 
         return content;

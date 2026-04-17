@@ -59,6 +59,14 @@ export interface FullNutrition {
 
 export interface FoodItem {
     id: string;
+    // Support flat macro structure for mixed component compatibility
+    calories?: number;
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+    fiber?: number;
+    sodium?: number;
+    sugar?: number;
     name: string;
     category: FoodCategory;
     image: string;

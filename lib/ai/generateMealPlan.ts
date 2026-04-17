@@ -7,6 +7,8 @@ import { callGroqAPI, GroqMessage } from "./groq";
 import { GeneratedMeal } from "../meal-planner";
 import { FoodItem } from "../food-db";
 
+let aiGlobalIdCounter = 0;
+
 /**
  * Validates the AI response structure strictly
  */
@@ -102,8 +104,22 @@ Return ONLY strict JSON:
             console.warn("[AI] Validation failed. Retrying once...");
             return generateMealPlanAI(userData, settings, blockedFoodNames, 1);
         }
-        throw error;
+        console.error("[AI] Final generation failed, providing fallback plan.");
+        return transformAIResponse(createFallbackPayload(settings?.targetCalories || 2000));
     }
+}
+
+function createFallbackPayload(cals: number) {
+    return {
+        daily_calories: cals,
+        macros: { protein: 150, carbs: 200, fats: 60 },
+        meals: {
+            breakfast: { name: "Basic Oatmeal", ingredients: [{name: "Oats", amount: "1/2 cup", calories: 300}], nutrition: {calories: 300, protein: 10, carbs: 50, fats: 5}, directions: ["Cook."], prep_time: "5 min" },
+            lunch: { name: "Chicken Rice", ingredients: [{name: "Chicken", amount: "100g", calories: 500}], nutrition: {calories: 500, protein: 40, carbs: 50, fats: 10}, directions: ["Cook."], prep_time: "15 min" },
+            dinner: { name: "Salmon Potatoes", ingredients: [{name: "Salmon", amount: "100g", calories: 600}], nutrition: {calories: 600, protein: 40, carbs: 40, fats: 20}, directions: ["Cook."], prep_time: "20 min" },
+            snack: { name: "Greek Yogurt", ingredients: [{name: "Yogurt", amount: "1 cup", calories: 200}], nutrition: {calories: 200, protein: 20, carbs: 10, fats: 5}, directions: ["Serve."], prep_time: "1 min" }
+        }
+    };
 }
 
 /**
@@ -253,7 +269,7 @@ function transformAIResponse(data: any): GeneratedMeal[] {
     return slots.map(slotKey => {
         const aiMeal = data.meals[slotKey];
         const virtualFood: FoodItem = {
-            id: `ai-${slotKey}-${Date.now()}`,
+            id: `ai-${slotKey}-${++aiGlobalIdCounter}`,
             name: aiMeal.name,
             calories: aiMeal.nutrition.calories,
             protein: aiMeal.nutrition.protein,
