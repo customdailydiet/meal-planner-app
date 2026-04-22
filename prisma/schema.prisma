@@ -1,0 +1,179 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// --- AUTH MODELS (NEXTAUTH) ---
+
+enum Role {
+  ADMIN
+  MANAGER
+  USER
+}
+
+enum Plan {
+  FREE
+  PREMIUM
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(USER)
+  plan          Plan      @default(FREE)
+  isEnabled     Boolean   @default(true)
+  accounts      Account[]
+  sessions      Session[]
+  
+  // App Specific
+  meals         MealRecord[]
+  customFoods   UserFood[]
+  userFeatures UserFeature[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// --- APP CONTENT MODELS ---
+
+model MealRecord {
+  id        String   @id @default(cuid())
+  userId    String
+  date      String   // YYYY-MM-DD
+  slot      String   // Breakfast, Lunch, Dinner, Snack
+  data      Json     // The GeneratedMeal object
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date, slot])
+}
+
+model UserFood {
+  id        String   @id @default(cuid())
+  userId    String
+  data      Json     // The FoodItem object
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- ADMIN / SYSTEM MODELS ---
+
+model AIConfig {
+  id              String   @id @default(cuid())
+  functionName    String   @unique // meal_generation, recipe_generation
+  promptTemplate  String   @db.Text
+  responseSchema  Json?
+  temperature     Float    @default(0.7)
+  primaryApiId    String?
+  fallbackApiId   String?
+
+  primaryApi      APIProvider? @relation("PrimaryAPI", fields: [primaryApiId], references: [id])
+  fallbackApi     APIProvider? @relation("FallbackAPI", fields: [fallbackApiId], references: [id])
+}
+
+model APIProvider {
+  id            String    @id @default(cuid())
+  name          String    // OpenAI, Groq, Anthropic
+  apiKey        String    // Should be encrypted in production
+  model         String
+  isEnabled     Boolean   @default(true)
+  priority      Int       @default(1)
+
+  primaryConfigs  AIConfig[] @relation("PrimaryAPI")
+  fallbackConfigs AIConfig[] @relation("FallbackAPI")
+}
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  key         String   @unique // recipe_synthesis, ai_rebalance
+  description String?
+  isEnabled   Boolean  @default(true) // Global toggle
+  
+  userOverrides UserFeature[]
+}
+
+model UserFeature {
+  id        String   @id @default(cuid())
+  userId    String
+  featureId String
+  isEnabled Boolean
+
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feature FeatureFlag @relation(fields: [featureId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, featureId])
+}
+
+model Ad {
+  id        String   @id @default(cuid())
+  code      String   @db.Text
+  position  String   // header, footer, popup
+  isEnabled Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AppSetting {
+  id              String   @id @default(cuid())
+  appName         String   @default("AI Meal Planner")
+  logoUrl         String?
+  theme           String   @default("light") // light, dark, system
+  metaTitle       String?
+  metaDescription String?
+  footerText      String?
+  smtpConfig      Json?    // Host, Port, User, Pass
+}
+
+model EmailTemplate {
+  id      String @id @default(cuid())
+  name    String @unique
+  subject String
+  body    String @db.Text
+}
