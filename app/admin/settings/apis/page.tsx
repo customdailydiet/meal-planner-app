@@ -12,6 +12,7 @@ import {
     Trash2, 
     Eye, 
     EyeOff,
+    Save,
     Cpu,
     Zap,
     Terminal,
